@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">ComposeLayoutsCodelab</string>
+    <string name="other_composable_greeting">"Hi there %s in a row!"</string>
+    <string name="greeting_route">greeting route</string>
+    <string name="personal_greeting_route">personalized route</string>
 </resources>

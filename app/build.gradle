@@ -52,7 +52,10 @@ dependencies {
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    //Compose
     implementation 'androidx.activity:activity-compose:1.3.0-alpha06'
+    //Compose Navigation
+    implementation "androidx.navigation:navigation-compose:1.0.0-alpha10"
     //additional icons from material design
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
     testImplementation 'junit:junit:4.13.2'

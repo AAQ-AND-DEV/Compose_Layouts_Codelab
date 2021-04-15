@@ -18,9 +18,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
+import com.example.composelayoutscodelab.nav.Screen
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -30,7 +37,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-         setContent {
+        //Crossfade
+        setContent {
             ComposeLayoutsCodelabTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
@@ -41,10 +49,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+
 @Composable
 fun LayoutsCodelab() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val navController = rememberNavController()
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -64,14 +78,42 @@ fun LayoutsCodelab() {
         bottomBar = {
             MyBottomBar()
         },
-        drawerContent = {MyDrawer(myDrawerState = drawerState, myScope = scope)}
+        drawerContent = { MyDrawer(myDrawerState = drawerState, myScope = scope) }
     )
     { innerPadding ->
-        BodyContent(
+        Greeting(navController,
             Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
         )
+        NavHost(navController, startDestination = Screen.Greeting.route){
+            composable(Screen.Greeting.route){ Greeting(navController) }
+            composable(Screen.PersonalizedGreeting.route){ NewBodyContent(navController)}
+        }
+    }
+}
+
+@Composable
+fun Greeting(navController: NavController, modifier: Modifier = Modifier){
+    Button(onClick = {navController.navigate(Screen.PersonalizedGreeting.route)}){
+        Text("Navigate to Personalized Greeting")
+    }
+}
+
+@Composable
+fun BodyContent(modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text("Hi there!")
+        Text("Thanks for going through the codelab")
+
+    }
+}
+
+@Composable
+fun NewBodyContent(navController: NavController, modifier: Modifier = Modifier){
+    Row(modifier){
+        Text(stringResource(R.string.other_composable_greeting, "Name"))
+                Text("This is another TV")
     }
 }
 
@@ -88,36 +130,33 @@ fun MyBottomBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MyDrawer(modifier: Modifier = Modifier, myDrawerState: DrawerState, myScope: CoroutineScope){
+fun MyDrawer(modifier: Modifier = Modifier, myDrawerState: DrawerState, myScope: CoroutineScope) {
     ModalDrawer(drawerState = myDrawerState,
-    drawerContent = {
-        Button(
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 16.dp),
-            onClick = { myScope.launch { myDrawerState.close() } },
-            content = { Text("Close Drawer") }
-        )
-    },
-    content = {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = if (myDrawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
-            Spacer(Modifier.height(20.dp))
-            Button(onClick = { myScope.launch { myDrawerState.open() } }) {
-                Text("Click to open")
+        gesturesEnabled = true,
+
+        drawerContent = {
+            Button(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 16.dp),
+                onClick = { myScope.launch { myDrawerState.close() } },
+                content = { Text("Close Drawer") }
+            )
+        },
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = if (myDrawerState.isClosed) ">>> Swipe >>>" else "<<< Swipe <<<")
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { myScope.launch { myDrawerState.open() } }) {
+                    Text("Click to open")
+                }
             }
-        }
-    })
-}
-
-@Composable
-fun BodyContent(modifier: Modifier = Modifier) {
-    Column(modifier) {
-        Text("Hi there!")
-        Text("Thanks for going through the codelab")
-
-    }
+        })
 }
 
 @Composable
