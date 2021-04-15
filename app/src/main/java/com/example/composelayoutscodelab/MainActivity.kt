@@ -57,8 +57,6 @@ fun LayoutsCodelab() {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
 
-
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -81,11 +79,6 @@ fun LayoutsCodelab() {
         drawerContent = { MyDrawer(myDrawerState = drawerState, myScope = scope) }
     )
     { innerPadding ->
-        Greeting(navController,
-            Modifier
-                .padding(innerPadding)
-                .padding(8.dp)
-        )
         NavHost(navController, startDestination = Screen.Greeting.route){
             composable(Screen.Greeting.route){ Greeting(navController) }
             composable(Screen.PersonalizedGreeting.route){ NewBodyContent(navController)}
@@ -95,7 +88,9 @@ fun LayoutsCodelab() {
 
 @Composable
 fun Greeting(navController: NavController, modifier: Modifier = Modifier){
-    Button(onClick = {navController.navigate(Screen.PersonalizedGreeting.route)}){
+    Button(onClick = {navController.navigate(Screen.PersonalizedGreeting.route){
+        launchSingleTop = true
+    } }){
         Text("Navigate to Personalized Greeting")
     }
 }
