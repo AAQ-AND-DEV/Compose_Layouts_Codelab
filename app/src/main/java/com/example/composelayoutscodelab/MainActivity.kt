@@ -17,16 +17,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigate
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import com.example.composelayoutscodelab.nav.Screen
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
 import kotlinx.coroutines.CoroutineScope
@@ -56,6 +54,12 @@ fun LayoutsCodelab() {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     val nameInputValue = remember { mutableStateOf(TextFieldValue()) }
+    //list of Screens for ModalDrawer Navigation
+    val navItems = listOf(
+        Screen.Greeting,
+        Screen.PersonalizedGreeting
+    )
+
 
     Scaffold(
         topBar = {
@@ -76,21 +80,22 @@ fun LayoutsCodelab() {
         bottomBar = {
             MyBottomBar()
         },
-        drawerContent = { MyDrawer(myDrawerState = drawerState, myScope = scope) }
+        drawerContent = { MyDrawer(items = navItems, navController = navController, myDrawerState = drawerState, myScope = scope) }
     )
     { innerPadding ->
         NavHost(navController, startDestination = Screen.Greeting.route) {
             composable(Screen.Greeting.route) { Greeting(navController, nameInputValue) }
             composable(Screen.PersonalizedGreeting.route) { navBackStackEntry ->
 
-                    navBackStackEntry.arguments?.getString("name")?.let {
-                        Log.d("mainAct", it
-                        )
-                    }
-                                NewBodyContent (
-                                navController,
-                        navBackStackEntry.arguments?.getString("name", "empty name")
+                navBackStackEntry.arguments?.getString("name")?.let {
+                    Log.d(
+                        "mainAct", it
                     )
+                }
+                NewBodyContent(
+                    navController,
+                    navBackStackEntry.arguments?.getString("name", "empty name")
+                )
 
             }
         }
@@ -109,15 +114,19 @@ fun Greeting(
             placeholder = { Text(text = "please enter your name") })
         Button(onClick = {
             Log.d("mainAct", inputValue.value.text)
+
             navController.navigate(
-                Screen.PersonalizedGreeting.route.replace(
+                if (inputValue.value.text.isNotEmpty()) Screen.PersonalizedGreeting.route.replace(
                     "{name}",
                     inputValue.value.text
-                )
+                ) else {
+                    Screen.PersonalizedGreeting.route.replace("{name}", "nameless one")
+                }
             ) {
                 launchSingleTop = true
             }
-        }) {
+        }
+        ) {
             Text("Navigate to Personalized Greeting")
         }
     }
@@ -157,11 +166,30 @@ fun MyBottomBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MyDrawer(modifier: Modifier = Modifier, myDrawerState: DrawerState, myScope: CoroutineScope) {
+fun MyDrawer(modifier: Modifier = Modifier, items: List<Screen>, navController: NavController, myDrawerState: DrawerState, myScope: CoroutineScope) {
+    val navBackStaEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStaEntry?.arguments?.getString(KEY_ROUTE)
     ModalDrawer(drawerState = myDrawerState,
         gesturesEnabled = true,
 
         drawerContent = {
+            items.forEach { screen ->
+                Text(
+                    stringResource(screen.resId),
+                    Modifier
+                        .clickable {
+                            navController.navigate(screen.route) {
+                                popUpTo = navController.graph.startDestination
+                                launchSingleTop = true
+                            }
+                        }
+                        .background(
+                            if (currentRoute == screen.route) colorResource(id = R.color.purple_700) else {
+                                colorResource(id = android.R.color.background_dark)
+                            }
+                        ),
+                )
+            }
             Button(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
