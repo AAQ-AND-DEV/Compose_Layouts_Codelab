@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBusiness
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +54,7 @@ fun LayoutsCodelab() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
-    val nameInputValue = remember { mutableStateOf(TextFieldValue()) }
+    var nameInputValue by rememberSaveable { mutableStateOf("") }
     //list of Screens for ModalDrawer Navigation
     val navItems = listOf(
         Screen.Greeting,
@@ -80,11 +81,23 @@ fun LayoutsCodelab() {
         bottomBar = {
             MyBottomBar()
         },
-        drawerContent = { MyDrawer(items = navItems, navController = navController, myDrawerState = drawerState, myScope = scope) }
+        drawerContent = {
+            MyDrawer(
+                items = navItems,
+                navController = navController,
+                myDrawerState = drawerState,
+                myScope = scope
+            )
+        }
     )
     { innerPadding ->
         NavHost(navController, startDestination = Screen.Greeting.route) {
-            composable(Screen.Greeting.route) { Greeting(navController, nameInputValue) }
+            composable(Screen.Greeting.route) {
+                Greeting(
+                    navController,
+                    nameInputValue,
+                    onNameChange = { nameInputValue = it })
+            }
             composable(Screen.PersonalizedGreeting.route) { navBackStackEntry ->
 
                 navBackStackEntry.arguments?.getString("name")?.let {
@@ -105,20 +118,21 @@ fun LayoutsCodelab() {
 @Composable
 fun Greeting(
     navController: NavController,
-    inputValue: MutableState<TextFieldValue>,
+    inputValue: String,
+    onNameChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column() {
 
-        TextField(inputValue.value, onValueChange = { inputValue.value = it },
+        TextField(inputValue, onValueChange = onNameChange,
             placeholder = { Text(text = "please enter your name") })
         Button(onClick = {
-            Log.d("mainAct", inputValue.value.text)
+            Log.d("mainAct", inputValue)
 
             navController.navigate(
-                if (inputValue.value.text.isNotEmpty()) Screen.PersonalizedGreeting.route.replace(
+                if (inputValue.isNotEmpty()) Screen.PersonalizedGreeting.route.replace(
                     "{name}",
-                    inputValue.value.text
+                    inputValue
                 ) else {
                     Screen.PersonalizedGreeting.route.replace("{name}", "nameless one")
                 }
@@ -166,7 +180,13 @@ fun MyBottomBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MyDrawer(modifier: Modifier = Modifier, items: List<Screen>, navController: NavController, myDrawerState: DrawerState, myScope: CoroutineScope) {
+fun MyDrawer(
+    modifier: Modifier = Modifier,
+    items: List<Screen>,
+    navController: NavController,
+    myDrawerState: DrawerState,
+    myScope: CoroutineScope
+) {
     val navBackStaEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStaEntry?.arguments?.getString(KEY_ROUTE)
     ModalDrawer(drawerState = myDrawerState,
