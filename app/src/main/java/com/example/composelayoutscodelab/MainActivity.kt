@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -14,10 +17,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBusiness
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,13 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
+import com.example.composelayoutscodelab.model.City
 import com.example.composelayoutscodelab.nav.Screen
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
+import com.example.composelayoutscodelab.viewmodels.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private val mainViewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +49,7 @@ class MainActivity : ComponentActivity() {
             ComposeLayoutsCodelabTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(color = MaterialTheme.colors.background) {
-                    LayoutsCodelab()
+                    LayoutsCodelab(mainViewModel)
                 }
             }
         }
@@ -50,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun LayoutsCodelab() {
+fun LayoutsCodelab(mvm: MainViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
@@ -58,7 +66,8 @@ fun LayoutsCodelab() {
     //list of Screens for ModalDrawer Navigation
     val navItems = listOf(
         Screen.Greeting,
-        Screen.PersonalizedGreeting
+        Screen.PersonalizedGreeting,
+        Screen.Cities
     )
 
 
@@ -111,7 +120,30 @@ fun LayoutsCodelab() {
                 )
 
             }
+            composable(Screen.Cities.route) {
+                CitiesScreen(mvm)
+            }
         }
+    }
+}
+
+@Composable
+fun CitiesScreen(vm: MainViewModel, modifier: Modifier = Modifier){
+    val cities : List<City> by vm.cities.observeAsState(initial = listOf())
+    LazyColumn(modifier = modifier) {
+        items(items = cities){
+            city ->
+            CityItem(city)
+            Divider(color = Color.Black)
+        }
+    }
+}
+
+@Composable
+fun CityItem(city: City){
+    Column() {
+        Text(city.name)
+        Text(city.country)
     }
 }
 
@@ -271,10 +303,10 @@ fun DefaultPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LayoutsCodelabPreview() {
-    ComposeLayoutsCodelabTheme {
-        LayoutsCodelab()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LayoutsCodelabPreview() {
+//    ComposeLayoutsCodelabTheme {
+//        LayoutsCodelab()
+//    }
+//}
