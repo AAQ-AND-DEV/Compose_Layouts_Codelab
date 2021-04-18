@@ -5,11 +5,11 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -23,18 +23,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
+import coil.transform.CircleCropTransformation
 import com.example.composelayoutscodelab.model.City
 import com.example.composelayoutscodelab.nav.Screen
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
 import com.example.composelayoutscodelab.viewmodels.MainViewModel
+import com.google.accompanist.coil.CoilImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -67,7 +70,10 @@ fun LayoutsCodelab(mvm: MainViewModel) {
     val navItems = listOf(
         Screen.Greeting,
         Screen.PersonalizedGreeting,
-        Screen.Cities
+        Screen.Cities,
+        Screen.NumberList,
+        Screen.LazyList,
+        Screen.ImageListScreen
     )
 
 
@@ -102,7 +108,7 @@ fun LayoutsCodelab(mvm: MainViewModel) {
     { innerPadding ->
         NavHost(navController, startDestination = Screen.Greeting.route) {
             composable(Screen.Greeting.route) {
-                Greeting(
+                Greeting(Modifier.padding(innerPadding),
                     navController,
                     nameInputValue,
                     onNameChange = { nameInputValue = it })
@@ -115,20 +121,32 @@ fun LayoutsCodelab(mvm: MainViewModel) {
                     )
                 }
                 NewBodyContent(
+                    Modifier.padding(innerPadding),
                     navController,
                     navBackStackEntry.arguments?.getString("name", "empty name")
                 )
-
             }
             composable(Screen.Cities.route) {
-                CitiesScreen(mvm)
+
+                CitiesScreen(
+                    Modifier.padding(innerPadding),
+                    mvm)
+            }
+            composable(Screen.NumberList.route){
+                SimpleList()
+            }
+            composable(Screen.LazyList.route){
+                LazyList()
+            }
+            composable(Screen.ImageListScreen.route){
+                ImageList()
             }
         }
     }
 }
 
 @Composable
-fun CitiesScreen(vm: MainViewModel, modifier: Modifier = Modifier){
+fun CitiesScreen(modifier: Modifier = Modifier, vm: MainViewModel){
     val cities : List<City> by vm.cities.observeAsState(initial = listOf())
     LazyColumn(modifier = modifier) {
         items(items = cities){
@@ -148,13 +166,90 @@ fun CityItem(city: City){
 }
 
 @Composable
+fun SimpleList(){
+    //passing scrollState to Modifier of Column required for scrolling
+    val scrollState = rememberScrollState()
+
+    //Column renders all items, regardless of presence on screen
+    Column(Modifier.verticalScroll(scrollState)){
+        repeat(100){
+            Text("Item #$it")
+            Divider(modifier = Modifier.background(color = Color.Black))
+        }
+    }
+}
+
+@Composable
+fun LazyList(){
+    //RememberLazyListState necessary for scrolling
+    //also useful for programmatic scrolling
+    val scrollState = rememberLazyListState()
+
+    LazyColumn(state = scrollState){
+        items(100){
+            Text("Item #$it")
+        }
+    }
+}
+
+@Composable
+fun ImageListItem(index: Int){
+//    val url = HttpUrl.Builder()
+//        .scheme("https")
+//        .host("unsplash.com")
+//        .addPathSegment("photos/hJ5uMIRNg5k/download")
+//        .addQueryParameter("force", "true")
+//        .build()
+    Row(verticalAlignment = Alignment.CenterVertically){
+        CoilImage(
+            data =
+            //"https://unsplash.com/photos/hJ5uMIRNg5k/download?force=true&w=640",
+            //"https://lh3.googleusercontent.com/proxy/rnEqHtARrOuXIVC_DYIO69XSoiKhjKbkic8HdmvqWT4zp8vr7GfbAJQMqU6Jaol7MLniNCCkqV0GDUIVgs8ZRyGe0vJrNO_NLGE2l5VwLzy6zEnorX-TgVARBdB5gg",
+            //"https://via.placeholder.com/600/92c952",
+            //"https://picsum.photos/300/300",
+            //"https://i.pinimg.com/originals/5a/dd/33/5add3332302c9db5e9a6aeedfeb6b29b.jpg",
+            //"https://www.instaily.com/images/android.jpg",
+            "https://www.freepik.com/download-file/1166230",
+            contentDescription = "Android Logo",
+            requestBuilder = {
+                transformations(CircleCropTransformation())
+            },
+            modifier = Modifier.size(150.dp),
+            contentScale = ContentScale.Crop,
+            loading = {
+                Box(Modifier.matchParentSize()){
+                    CircularProgressIndicator(Modifier.align(Alignment.TopStart))
+                }
+            },
+            error = {
+                Log.d("MainAct:CoilImage", "throwable: ${it.throwable}")
+                Image(painterResource(R.drawable.ic_error_foreground), "standin string. is this contentDesc?")
+            }
+        )
+        Spacer(Modifier.width(10.dp))
+        Text("Item #$index", style = MaterialTheme.typography.subtitle1)
+    }
+}
+
+@Composable
+fun ImageList(){
+    val scrollState = rememberLazyListState()
+    
+    LazyColumn(state = scrollState) {
+        items(100){
+            ImageListItem(index = it)
+        }
+    }
+}
+
+@Composable
 fun Greeting(
+    modifier: Modifier = Modifier,
     navController: NavController,
     inputValue: String,
     onNameChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column() {
+    ) {
+    Column(modifier = modifier) {
 
         TextField(inputValue, onValueChange = onNameChange,
             placeholder = { Text(text = "please enter your name") })
@@ -188,7 +283,10 @@ fun BodyContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NewBodyContent(navController: NavController, name: String?, modifier: Modifier = Modifier) {
+fun NewBodyContent(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    name: String?) {
     Row(modifier) {
         if (name != null) {
             Text(stringResource(R.string.other_composable_greeting, name))

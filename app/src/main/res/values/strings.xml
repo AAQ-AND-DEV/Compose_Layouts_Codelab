@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">ComposeLayoutsCodelab</string>
     <string name="other_composable_greeting">"Hi there %s in a row!"</string>
-    <string name="greeting_route">greeting route</string>
-    <string name="personal_greeting_route">personalized route</string>
-    <string name="cities_route">cities route</string>
+    <string name="greeting_route" translatable="false">greeting route</string>
+    <string name="personal_greeting_route" translatable="false">personalized route</string>
+    <string name="cities_route" translatable="false">cities route</string>
+    <string name="number_list_route" translatable="false">number list route</string>
+    <string name="lazy_list_route" translatable="false">lazy list route</string>
+    <string name="image_list_route" translatable="false">image list route</string>
 </resources>
