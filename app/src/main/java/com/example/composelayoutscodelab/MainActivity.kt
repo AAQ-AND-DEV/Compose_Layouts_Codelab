@@ -130,15 +130,16 @@ fun LayoutsCodelab(mvm: MainViewModel) {
 
                 CitiesScreen(
                     Modifier.padding(innerPadding),
-                    mvm)
+                    mvm
+                )
             }
-            composable(Screen.NumberList.route){
+            composable(Screen.NumberList.route) {
                 SimpleList()
             }
-            composable(Screen.LazyList.route){
+            composable(Screen.LazyList.route) {
                 LazyList()
             }
-            composable(Screen.ImageListScreen.route){
+            composable(Screen.ImageListScreen.route) {
                 ImageList()
             }
         }
@@ -146,11 +147,10 @@ fun LayoutsCodelab(mvm: MainViewModel) {
 }
 
 @Composable
-fun CitiesScreen(modifier: Modifier = Modifier, vm: MainViewModel){
-    val cities : List<City> by vm.cities.observeAsState(initial = listOf())
+fun CitiesScreen(modifier: Modifier = Modifier, vm: MainViewModel) {
+    val cities: List<City> by vm.cities.observeAsState(initial = listOf())
     LazyColumn(modifier = modifier) {
-        items(items = cities){
-            city ->
+        items(items = cities) { city ->
             CityItem(city)
             Divider(color = Color.Black)
         }
@@ -158,7 +158,7 @@ fun CitiesScreen(modifier: Modifier = Modifier, vm: MainViewModel){
 }
 
 @Composable
-fun CityItem(city: City){
+fun CityItem(city: City) {
     Column() {
         Text(city.name)
         Text(city.country)
@@ -166,13 +166,13 @@ fun CityItem(city: City){
 }
 
 @Composable
-fun SimpleList(){
+fun SimpleList() {
     //passing scrollState to Modifier of Column required for scrolling
     val scrollState = rememberScrollState()
 
     //Column renders all items, regardless of presence on screen
-    Column(Modifier.verticalScroll(scrollState)){
-        repeat(100){
+    Column(Modifier.verticalScroll(scrollState)) {
+        repeat(100) {
             Text("Item #$it")
             Divider(modifier = Modifier.background(color = Color.Black))
         }
@@ -180,27 +180,27 @@ fun SimpleList(){
 }
 
 @Composable
-fun LazyList(){
+fun LazyList() {
     //RememberLazyListState necessary for scrolling
     //also useful for programmatic scrolling
     val scrollState = rememberLazyListState()
 
-    LazyColumn(state = scrollState){
-        items(100){
+    LazyColumn(state = scrollState) {
+        items(100) {
             Text("Item #$it")
         }
     }
 }
 
 @Composable
-fun ImageListItem(index: Int){
+fun ImageListItem(index: Int) {
 //    val url = HttpUrl.Builder()
 //        .scheme("https")
 //        .host("unsplash.com")
 //        .addPathSegment("photos/hJ5uMIRNg5k/download")
 //        .addQueryParameter("force", "true")
 //        .build()
-    Row(verticalAlignment = Alignment.CenterVertically){
+    Row(verticalAlignment = Alignment.CenterVertically) {
         CoilImage(
             data =
             //"https://unsplash.com/photos/hJ5uMIRNg5k/download?force=true&w=640",
@@ -217,13 +217,16 @@ fun ImageListItem(index: Int){
             modifier = Modifier.size(150.dp),
             contentScale = ContentScale.Crop,
             loading = {
-                Box(Modifier.matchParentSize()){
+                Box(Modifier.matchParentSize()) {
                     CircularProgressIndicator(Modifier.align(Alignment.TopStart))
                 }
             },
             error = {
                 Log.d("MainAct:CoilImage", "throwable: ${it.throwable}")
-                Image(painterResource(R.drawable.ic_error_foreground), "standin string. is this contentDesc?")
+                Image(
+                    painterResource(R.drawable.ic_error_foreground),
+                    "standin string. is this contentDesc?"
+                )
             }
         )
         Spacer(Modifier.width(10.dp))
@@ -232,12 +235,31 @@ fun ImageListItem(index: Int){
 }
 
 @Composable
-fun ImageList(){
+fun ImageList() {
     val scrollState = rememberLazyListState()
-    
-    LazyColumn(state = scrollState) {
-        items(100){
-            ImageListItem(index = it)
+    val scope = rememberCoroutineScope()
+    val listCount = 100
+
+    Column {
+        Row {
+            Button(onClick = {
+                scope.launch {
+                    scrollState.animateScrollToItem(0)
+                }
+            }
+            ) { Text("Scroll to top") }
+            Button(onClick = {
+                scope.launch {
+                    //scroll to last index of list
+                    scrollState.animateScrollToItem(listCount - 1)
+                }
+            }) { Text("Scroll to end") }
+        }
+
+        LazyColumn(state = scrollState) {
+            items(listCount) {
+                ImageListItem(index = it)
+            }
         }
     }
 }
@@ -248,7 +270,7 @@ fun Greeting(
     navController: NavController,
     inputValue: String,
     onNameChange: (String) -> Unit,
-    ) {
+) {
     Column(modifier = modifier) {
 
         TextField(inputValue, onValueChange = onNameChange,
@@ -286,7 +308,8 @@ fun BodyContent(modifier: Modifier = Modifier) {
 fun NewBodyContent(
     modifier: Modifier = Modifier,
     navController: NavController,
-    name: String?) {
+    name: String?
+) {
     Row(modifier) {
         if (name != null) {
             Text(stringResource(R.string.other_composable_greeting, name))
