@@ -23,12 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
@@ -431,3 +435,36 @@ fun DefaultPreview() {
 //        LayoutsCodelab()
 //    }
 //}
+
+@Preview(showBackground = true)
+@Composable
+fun TextWithPaddingToBaselinePreview(){
+    ComposeLayoutsCodelabTheme() {
+        Text("Hi There!", Modifier.firstBaselineToTop(32.dp))
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TextWithNormalPadding(){
+    ComposeLayoutsCodelabTheme() {
+        Text("Hi There!", Modifier.padding(top = 32.dp))
+    }
+}
+
+private fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) =
+    Modifier.layout { measureable, constraints ->
+        val placeable = measureable.measure(constraints)
+
+        //check composable has first baseline
+        check(placeable[FirstBaseline] != AlignmentLine.Unspecified)
+        val firstBaseline = placeable[FirstBaseline]
+
+        //Height of composable with padding - first baseline
+        val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
+        val height = placeable.height + placeableY
+        layout(placeable.width, height){
+            placeable.placeRelative(0, placeableY)
+        }
+}
