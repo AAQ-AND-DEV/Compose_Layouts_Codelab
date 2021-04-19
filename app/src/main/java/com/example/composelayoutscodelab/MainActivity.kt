@@ -153,10 +153,10 @@ fun LayoutsCodelab(mvm: MainViewModel) {
 //            composable(Screen.TimeShiftedScreen.route){
 //                TimeShifted()
 //            }
-            composable(Screen.MyOwnColumn.route){
+            composable(Screen.MyOwnColumn.route) {
                 MyOwnColContent()
             }
-            composable(Screen.StaggeredChips.route){
+            composable(Screen.StaggeredChips.route) {
                 StaggeredBodyContent(rows = 5, mvm = mvm)
             }
         }
@@ -164,10 +164,13 @@ fun LayoutsCodelab(mvm: MainViewModel) {
 }
 
 @Composable
-fun StaggeredBodyContent(modifier: Modifier = Modifier, rows: Int, mvm: MainViewModel){
-    StaggeredGrid(modifier = modifier, rows = rows) {
-        for (topic in mvm.topics)
-            Chip(modifier = Modifier.padding(8.dp), text = topic)
+fun StaggeredBodyContent(modifier: Modifier = Modifier, rows: Int, mvm: MainViewModel) {
+    Row(modifier = modifier.horizontalScroll(rememberScrollState())) {
+
+        StaggeredGrid(modifier = modifier, rows = rows) {
+            for (topic in mvm.topics)
+                Chip(modifier = Modifier.padding(8.dp), text = topic)
+        }
     }
 }
 
@@ -220,19 +223,19 @@ fun LazyList() {
 @Composable
 fun MyOwnColumn(
     modifier: Modifier = Modifier,
-    content: @Composable () ->Unit
-){
+    content: @Composable () -> Unit
+) {
     Layout(
         modifier = modifier,
         content = content
-    ){ measurables, constraints ->
-        val placeables = measurables.map{ measurable: Measurable ->
+    ) { measurables, constraints ->
+        val placeables = measurables.map { measurable: Measurable ->
             //measure each child
             measurable.measure(constraints)
         }
         //track y coord we have placed children up to
         var yPosition = 0
-        layout(constraints.maxWidth, constraints.maxHeight){
+        layout(constraints.maxWidth, constraints.maxHeight) {
             //place children
             placeables.forEach { placeable ->
                 //Position item on screen
@@ -245,7 +248,7 @@ fun MyOwnColumn(
 }
 
 @Composable
-fun MyOwnColContent(modifier: Modifier = Modifier){
+fun MyOwnColContent(modifier: Modifier = Modifier) {
     MyOwnColumn(modifier.padding(8.dp)) {
         Text("MyOwnColumn")
         Text("places items")
@@ -259,17 +262,19 @@ fun StaggeredGrid(
     modifier: Modifier = Modifier,
     rows: Int = 3,
     content: @Composable () -> Unit
-){
-    Layout(modifier = modifier,
-    content = content,){measurables, constraints ->
+) {
+    Layout(
+        modifier = modifier,
+        content = content,
+    ) { measurables, constraints ->
         //track width of each row
-        val rowWidths = IntArray(rows) {0}
+        val rowWidths = IntArray(rows) { 0 }
 
         //track maxHeight of each row
-        val rowMaxHeights = IntArray(rows){0}
+        val rowMaxHeights = IntArray(rows) { 0 }
 
         //list of measured children, given constraints
-        val placeables = measurables.mapIndexed{index, measureable ->
+        val placeables = measurables.mapIndexed { index, measureable ->
             val placeable = measureable.measure(constraints)
 
             //track width and maxHeight
@@ -281,24 +286,25 @@ fun StaggeredGrid(
         }
 
         //grid's width is widest row
-        val width = rowWidths.maxOrNull()?.coerceIn(constraints.minWidth.rangeTo(constraints.maxWidth))
-            ?: constraints.minWidth
+        val width =
+            rowWidths.maxOrNull()?.coerceIn(constraints.minWidth.rangeTo(constraints.maxWidth))
+                ?: constraints.minWidth
 
         //Grid's height is sum of the tallest el in each row
         //coerced to height constraints
-        val height = rowMaxHeights.sumBy{it}
+        val height = rowMaxHeights.sumBy { it }
             .coerceIn(constraints.minHeight.rangeTo(constraints.maxHeight))
 
         //Y of each row, mased on height accumulation of prev rows
-        val rowY = IntArray(rows) {0}
-        for (i in 1 until rows){
-            rowY[i] = rowY[i-1] + rowMaxHeights[i-1]
+        val rowY = IntArray(rows) { 0 }
+        for (i in 1 until rows) {
+            rowY[i] = rowY[i - 1] + rowMaxHeights[i - 1]
         }
 
         //set size of parent layout
-        layout(width, height){
+        layout(width, height) {
             //x cord we have placed up to, per row
-            val rowX = IntArray(rows){0}
+            val rowX = IntArray(rows) { 0 }
 
             placeables.forEachIndexed { index, placeable ->
                 val row = index % rows
@@ -313,17 +319,21 @@ fun StaggeredGrid(
 }
 
 @Composable
-fun Chip(modifier: Modifier =Modifier, text: String){
-    Card(modifier = modifier,
-    border = BorderStroke(color = Color.Black, width = Dp.Hairline),
-    shape = RoundedCornerShape(8.dp)){
+fun Chip(modifier: Modifier = Modifier, text: String) {
+    Card(
+        modifier = modifier,
+        border = BorderStroke(color = Color.Black, width = Dp.Hairline),
+        shape = RoundedCornerShape(8.dp)
+    ) {
         Row(
             modifier = Modifier.padding(start = 8.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
-            Box(modifier = Modifier
-                .size(16.dp, 16.dp)
-                .background(color = MaterialTheme.colors.secondary))
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(16.dp, 16.dp)
+                    .background(color = MaterialTheme.colors.secondary)
+            )
             Spacer(Modifier.width(4.dp))
             Text(text = text)
         }
@@ -331,10 +341,9 @@ fun Chip(modifier: Modifier =Modifier, text: String){
 }
 
 
-
 @Preview
 @Composable
-fun ChipPreview(){
+fun ChipPreview() {
     ComposeLayoutsCodelabTheme() {
         Chip(text = "Hi there!")
     }
@@ -493,7 +502,7 @@ fun MyDrawer(
                         }
                         .background(
                             if (currentRoute == screen.route) colorResource(id = R.color.purple_700) else {
-                                colorResource(id = android.R.color.background_dark)
+                                colorResource(id = android.R.color.background_light)
                             }
                         ),
                 )
@@ -569,7 +578,7 @@ fun DefaultPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun TextWithPaddingToBaselinePreview(){
+fun TextWithPaddingToBaselinePreview() {
     ComposeLayoutsCodelabTheme() {
         Text("Hi There!", Modifier.firstBaselineToTop(32.dp))
     }
@@ -577,7 +586,7 @@ fun TextWithPaddingToBaselinePreview(){
 
 @Preview(showBackground = true)
 @Composable
-fun TextWithNormalPadding(){
+fun TextWithNormalPadding() {
     ComposeLayoutsCodelabTheme() {
         Text("Hi There!", Modifier.padding(top = 32.dp))
     }
@@ -594,7 +603,7 @@ private fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) =
         //Height of composable with padding - first baseline
         val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
         val height = placeable.height + placeableY
-        layout(placeable.width, height){
+        layout(placeable.width, height) {
             placeable.placeRelative(0, placeableY)
         }
-}
+    }
