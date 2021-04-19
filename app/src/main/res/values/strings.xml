@@ -7,4 +7,6 @@
     <string name="number_list_route" translatable="false">number list route</string>
     <string name="lazy_list_route" translatable="false">lazy list route</string>
     <string name="image_list_route" translatable="false">image list route</string>
+    <string name="time_shift_route" translatable="false">time shift route</string>
+    <string name="my_own_col_route" translatable="false">my own column route</string>
 </resources>

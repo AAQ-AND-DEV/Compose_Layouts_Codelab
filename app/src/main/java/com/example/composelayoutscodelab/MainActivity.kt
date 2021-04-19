@@ -23,10 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,11 +36,13 @@ import androidx.navigation.compose.*
 import coil.transform.CircleCropTransformation
 import com.example.composelayoutscodelab.model.City
 import com.example.composelayoutscodelab.nav.Screen
+//import com.example.composelayoutscodelab.playground.TimeShifted
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
 import com.example.composelayoutscodelab.viewmodels.MainViewModel
 import com.google.accompanist.coil.CoilImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.sql.Time
 
 class MainActivity : ComponentActivity() {
 
@@ -77,7 +76,9 @@ fun LayoutsCodelab(mvm: MainViewModel) {
         Screen.Cities,
         Screen.NumberList,
         Screen.LazyList,
-        Screen.ImageListScreen
+        Screen.ImageListScreen,
+        //Screen.TimeShiftedScreen
+        Screen.MyOwnColumn
     )
 
 
@@ -146,6 +147,12 @@ fun LayoutsCodelab(mvm: MainViewModel) {
             composable(Screen.ImageListScreen.route) {
                 ImageList()
             }
+//            composable(Screen.TimeShiftedScreen.route){
+//                TimeShifted()
+//            }
+            composable(Screen.MyOwnColumn.route){
+                MyOwnColContent()
+            }
         }
     }
 }
@@ -193,6 +200,43 @@ fun LazyList() {
         items(100) {
             Text("Item #$it")
         }
+    }
+}
+
+@Composable
+fun MyOwnColumn(
+    modifier: Modifier = Modifier,
+    content: @Composable () ->Unit
+){
+    Layout(
+        modifier = modifier,
+        content = content
+    ){ measurables, constraints ->
+        val placeables = measurables.map{ measurable: Measurable ->
+            //measure each child
+            measurable.measure(constraints)
+        }
+        //track y coord we have placed children up to
+        var yPosition = 0
+        layout(constraints.maxWidth, constraints.maxHeight){
+            //place children
+            placeables.forEach { placeable ->
+                //Position item on screen
+                placeable.placeRelative(x = 0, y = yPosition)
+                yPosition += placeable.height
+            }
+        }
+
+    }
+}
+
+@Composable
+fun MyOwnColContent(modifier: Modifier = Modifier){
+    MyOwnColumn(modifier.padding(8.dp)) {
+        Text("MyOwnColumn")
+        Text("places items")
+        Text("vertically.")
+        Text("we've done it by hand!")
     }
 }
 
@@ -441,7 +485,6 @@ fun DefaultPreview() {
 fun TextWithPaddingToBaselinePreview(){
     ComposeLayoutsCodelabTheme() {
         Text("Hi There!", Modifier.firstBaselineToTop(32.dp))
-
     }
 }
 
