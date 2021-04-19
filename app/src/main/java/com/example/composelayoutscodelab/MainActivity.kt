@@ -43,6 +43,7 @@ import com.google.accompanist.coil.CoilImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.sql.Time
+import kotlin.math.absoluteValue
 
 class MainActivity : ComponentActivity() {
 
@@ -69,6 +70,7 @@ fun LayoutsCodelab(mvm: MainViewModel) {
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     var nameInputValue by rememberSaveable { mutableStateOf("") }
+
     //list of Screens for ModalDrawer Navigation
     val navItems = listOf(
         Screen.Greeting,
@@ -78,7 +80,8 @@ fun LayoutsCodelab(mvm: MainViewModel) {
         Screen.LazyList,
         Screen.ImageListScreen,
         //Screen.TimeShiftedScreen
-        Screen.MyOwnColumn
+        Screen.MyOwnColumn,
+        Screen.StaggeredChips
     )
 
 
@@ -153,7 +156,18 @@ fun LayoutsCodelab(mvm: MainViewModel) {
             composable(Screen.MyOwnColumn.route){
                 MyOwnColContent()
             }
+            composable(Screen.StaggeredChips.route){
+                StaggeredBodyContent(rows = 5, mvm = mvm)
+            }
         }
+    }
+}
+
+@Composable
+fun StaggeredBodyContent(modifier: Modifier = Modifier, rows: Int, mvm: MainViewModel){
+    StaggeredGrid(modifier = modifier, rows = rows) {
+        for (topic in mvm.topics)
+            Chip(modifier = Modifier.padding(8.dp), text = topic)
     }
 }
 
@@ -241,23 +255,96 @@ fun MyOwnColContent(modifier: Modifier = Modifier){
 }
 
 @Composable
+fun StaggeredGrid(
+    modifier: Modifier = Modifier,
+    rows: Int = 3,
+    content: @Composable () -> Unit
+){
+    Layout(modifier = modifier,
+    content = content,){measurables, constraints ->
+        //track width of each row
+        val rowWidths = IntArray(rows) {0}
+
+        //track maxHeight of each row
+        val rowMaxHeights = IntArray(rows){0}
+
+        //list of measured children, given constraints
+        val placeables = measurables.mapIndexed{index, measureable ->
+            val placeable = measureable.measure(constraints)
+
+            //track width and maxHeight
+            val row = index % rows
+            rowWidths[row] = rowWidths[row] + placeable.width.absoluteValue
+            rowMaxHeights[row] = kotlin.math.max(rowMaxHeights[row], placeable.height.absoluteValue)
+
+            placeable
+        }
+
+        //grid's width is widest row
+        val width = rowWidths.maxOrNull()?.coerceIn(constraints.minWidth.rangeTo(constraints.maxWidth))
+            ?: constraints.minWidth
+
+        //Grid's height is sum of the tallest el in each row
+        //coerced to height constraints
+        val height = rowMaxHeights.sumBy{it}
+            .coerceIn(constraints.minHeight.rangeTo(constraints.maxHeight))
+
+        //Y of each row, mased on height accumulation of prev rows
+        val rowY = IntArray(rows) {0}
+        for (i in 1 until rows){
+            rowY[i] = rowY[i-1] + rowMaxHeights[i-1]
+        }
+
+        //set size of parent layout
+        layout(width, height){
+            //x cord we have placed up to, per row
+            val rowX = IntArray(rows){0}
+
+            placeables.forEachIndexed { index, placeable ->
+                val row = index % rows
+                placeable.placeRelative(
+                    x = rowX[row],
+                    y = rowY[row]
+                )
+                rowX[row] += placeable.width
+            }
+        }
+    }
+}
+
+@Composable
+fun Chip(modifier: Modifier =Modifier, text: String){
+    Card(modifier = modifier,
+    border = BorderStroke(color = Color.Black, width = Dp.Hairline),
+    shape = RoundedCornerShape(8.dp)){
+        Row(
+            modifier = Modifier.padding(start = 8.dp, top = 4.dp, end = 8.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Box(modifier = Modifier
+                .size(16.dp, 16.dp)
+                .background(color = MaterialTheme.colors.secondary))
+            Spacer(Modifier.width(4.dp))
+            Text(text = text)
+        }
+    }
+}
+
+
+
+@Preview
+@Composable
+fun ChipPreview(){
+    ComposeLayoutsCodelabTheme() {
+        Chip(text = "Hi there!")
+    }
+}
+
+@Composable
 fun ImageListItem(index: Int) {
-//    val url = HttpUrl.Builder()
-//        .scheme("https")
-//        .host("unsplash.com")
-//        .addPathSegment("photos/hJ5uMIRNg5k/download")
-//        .addQueryParameter("force", "true")
-//        .build()
     Row(verticalAlignment = Alignment.CenterVertically) {
         CoilImage(
-            data =
-            //"https://unsplash.com/photos/hJ5uMIRNg5k/download?force=true&w=640",
-            //"https://lh3.googleusercontent.com/proxy/rnEqHtARrOuXIVC_DYIO69XSoiKhjKbkic8HdmvqWT4zp8vr7GfbAJQMqU6Jaol7MLniNCCkqV0GDUIVgs8ZRyGe0vJrNO_NLGE2l5VwLzy6zEnorX-TgVARBdB5gg",
-            //"https://via.placeholder.com/600/92c952",
-            //"https://picsum.photos/300/300",
-            //"https://i.pinimg.com/originals/5a/dd/33/5add3332302c9db5e9a6aeedfeb6b29b.jpg",
-            //"https://www.instaily.com/images/android.jpg",
-            "https://www.freepik.com/download-file/1166230",
+            data = "https://www.freepik.com/download-file/1166230",
             contentDescription = "Android Logo",
             requestBuilder = {
                 transformations(CircleCropTransformation())

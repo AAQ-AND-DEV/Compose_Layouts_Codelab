@@ -9,4 +9,5 @@
     <string name="image_list_route" translatable="false">image list route</string>
     <string name="time_shift_route" translatable="false">time shift route</string>
     <string name="my_own_col_route" translatable="false">my own column route</string>
+    <string name="staggered_chips_route" translatable="false">staggered route</string>
 </resources>

@@ -12,4 +12,5 @@ sealed class Screen(val route: String, @StringRes val resId: Int){
     object ImageListScreen: Screen("ImageList", R.string.image_list_route)
     //object TimeShiftedScreen: Screen("timeShift", R.string.time_shift_route)
     object MyOwnColumn: Screen("myOwnColumn", R.string.my_own_col_route)
+    object StaggeredChips: Screen("staggeredChips", R.string.staggered_chips_route)
 }

@@ -16,6 +16,11 @@ class MainViewModel : ViewModel() {
         _cities.value = citiesList
     }
 
+    val topics = listOf("Arts & Crafts", "Beauty", "Books", "Business", "Comics", "Culinary",
+        "Design", "Fashion", "Film", "History", "Maths", "Music", "People", "Philosophy",
+        "Religion", "Social sciences", "Technology", "TV", "Writing")
+
+
     fun addCity(city: City){
         var currList = _cities.value
         if (currList != null) {
