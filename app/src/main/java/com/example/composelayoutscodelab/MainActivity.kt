@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import coil.transform.CircleCropTransformation
 import com.example.composelayoutscodelab.model.City
+import com.example.composelayoutscodelab.model.Plate
 import com.example.composelayoutscodelab.nav.Screen
 //import com.example.composelayoutscodelab.playground.TimeShifted
 import com.example.composelayoutscodelab.ui.theme.ComposeLayoutsCodelabTheme
@@ -84,7 +85,8 @@ fun LayoutsCodelab(mvm: MainViewModel) {
         //Screen.TimeShiftedScreen
         Screen.MyOwnColumn,
         Screen.StaggeredChips,
-        Screen.SimpleConstraint
+        Screen.SimpleConstraint,
+        Screen.LargeConstraint
     )
 
 
@@ -167,6 +169,11 @@ fun LayoutsCodelab(mvm: MainViewModel) {
                     ConstraintLayoutContent()
                 }
             }
+            composable(Screen.LargeConstraint.route){
+                ComposeLayoutsCodelabTheme {
+                    LargeConstraintLayout()
+                }
+            }
         }
     }
 }
@@ -217,17 +224,94 @@ fun ConstraintLayoutContent(){
     }
 }
 
+@Preview
+@Composable
+fun ListItemPreview(){
+    val plate = Plate()
+    ListItem(plate)
+}
+
+//trying to help on a question asked here: https://askandroidquestions.com/2020/09/24/how-to-achieve-this-layout-in-jetpack-compose/
+@Composable
+fun ListItem(item: Plate) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = 2.dp
+    ) {
+        ConstraintLayout(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            val guideline = createGuidelineFromStart(0.2f)
+
+            val(column, divider, text) = createRefs()
+
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .constrainAs(column){
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(guideline)
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Code")
+                Text(text = item.code)
+            }
+            Divider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(color = MaterialTheme.colors.onSurface.copy(0.12f))
+                    .constrainAs(divider){
+                        top.linkTo(column.top)
+                        bottom.linkTo(column.bottom)
+                        start.linkTo(guideline)
+                    }
+            )
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 34.dp)
+                    .constrainAs(text){
+                        start.linkTo(divider.end)
+                        end.linkTo(parent.end)
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    },
+                text = item.name
+            )
+        }
+    }
+}
+
 @Composable
 fun LargeConstraintLayout(){
     ConstraintLayout() {
-        val text = createRef()
+        val (text, text2) = createRefs()
+
 
         val guideline = createGuidelineFromStart(fraction = 0.5f)
+
         Text("This is a very very very very very very very very long text",
         Modifier.constrainAs(text){
             linkTo(start = guideline, end = parent.end)
+            //just a note, fillToConstraints for width here causes Preview to not load
+            //going to test on device, confirmed -- nothing renders on screen.
+            //TODO see if a custom layout would allow for logging?
             width = Dimension.preferredWrapContent
         })
+        //was hoping this log statement would give me the layout coords
+        Log.d("constraint", "left: ${text.start} right: ${text.absoluteRight} top: ${text.top}")
+
+        Text("This is a second very very very very very very very very long text",
+            Modifier.constrainAs(text2){
+                linkTo(start = parent.start, end = guideline)
+                top.linkTo(text.bottom)
+                width = Dimension.fillToConstraints
+            }
+            )
     }
 }
 

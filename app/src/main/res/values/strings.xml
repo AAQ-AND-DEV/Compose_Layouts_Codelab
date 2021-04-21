@@ -11,4 +11,5 @@
     <string name="my_own_col_route" translatable="false">my own column route</string>
     <string name="staggered_chips_route" translatable="false">staggered route</string>
     <string name="simple_constraint" translatable="false">simple constraint route</string>
+    <string name="large_constraint" translatable="false">large constraint route</string>
 </resources>

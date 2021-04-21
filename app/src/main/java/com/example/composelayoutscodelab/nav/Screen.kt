@@ -14,4 +14,5 @@ sealed class Screen(val route: String, @StringRes val resId: Int){
     object MyOwnColumn: Screen("myOwnColumn", R.string.my_own_col_route)
     object StaggeredChips: Screen("staggeredChips", R.string.staggered_chips_route)
     object SimpleConstraint: Screen("simpleConstraint", R.string.simple_constraint)
+    object LargeConstraint: Screen("largeConstraint", R.string.large_constraint)
 }
