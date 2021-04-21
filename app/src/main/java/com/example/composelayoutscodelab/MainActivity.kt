@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.compose.Dimension.Companion.wrapContent
 import androidx.navigation.NavController
 import androidx.navigation.compose.*
 import coil.transform.CircleCropTransformation
@@ -232,10 +233,11 @@ fun ListItemPreview(){
 }
 
 //trying to help on a question asked here: https://askandroidquestions.com/2020/09/24/how-to-achieve-this-layout-in-jetpack-compose/
+//which i found is a copy of the original question here: https://stackoverflow.com/questions/64043704/how-to-achieve-this-layout-in-jetpack-compose
 @Composable
 fun ListItem(item: Plate) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         shape = RoundedCornerShape(8.dp),
         elevation = 2.dp
     ) {
@@ -253,23 +255,22 @@ fun ListItem(item: Plate) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
-                        end.linkTo(guideline)
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "Code")
                 Text(text = item.code)
             }
-            Divider(
+            Spacer(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.dp)
-                    .background(color = MaterialTheme.colors.onSurface.copy(0.12f))
                     .constrainAs(divider){
                         top.linkTo(column.top)
                         bottom.linkTo(column.bottom)
                         start.linkTo(guideline)
                     }
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(color = MaterialTheme.colors.onSurface.copy(0.12f))
             )
             Text(
                 modifier = Modifier
