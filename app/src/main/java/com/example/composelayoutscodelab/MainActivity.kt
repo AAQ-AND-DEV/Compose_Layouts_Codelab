@@ -28,10 +28,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.constraintlayout.compose.Dimension.Companion.wrapContent
 import androidx.navigation.NavController
@@ -87,7 +89,8 @@ fun LayoutsCodelab(mvm: MainViewModel) {
         Screen.MyOwnColumn,
         Screen.StaggeredChips,
         Screen.SimpleConstraint,
-        Screen.LargeConstraint
+        Screen.LargeConstraint,
+        Screen.DecoupledConstraint
     )
 
 
@@ -175,6 +178,11 @@ fun LayoutsCodelab(mvm: MainViewModel) {
                     LargeConstraintLayout()
                 }
             }
+            composable(Screen.DecoupledConstraint.route){
+                ComposeLayoutsCodelabTheme {
+                    DecoupledConstraintLayout()
+                }
+            }
         }
     }
 }
@@ -227,6 +235,53 @@ fun ConstraintLayoutContent(){
 
 @Preview
 @Composable
+fun DecoupledConstraintPreview(){
+    ComposeLayoutsCodelabTheme {
+        DecoupledConstraintLayout()
+    }
+}
+
+@Composable
+fun DecoupledConstraintLayout(){
+    BoxWithConstraints() {
+        val constraints = if (maxWidth < maxHeight){
+            decoupledConstraints(margin = 16.dp) // portrait
+        } else{
+            decoupledConstraints(margin = 32.dp) //landscape
+        }
+
+
+
+        ConstraintLayout(constraints) {
+            Button(
+                onClick = { Log.d("mainAct", "decoupled button clicked")},
+                modifier = Modifier.layoutId("button")
+            ){
+                Text("Button")
+            }
+            Text("Text", Modifier.layoutId("text"), textAlign = TextAlign.Center)
+        }
+    }
+}
+
+private fun decoupledConstraints(margin : Dp): ConstraintSet {
+    return ConstraintSet {
+        val button = createRefFor("button")
+        val text = createRefFor("text")
+
+        constrain(button){
+            top.linkTo(parent.top, margin = margin)
+        }
+        constrain(text){
+            top.linkTo(button.bottom, margin)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+    }
+}
+
+@Preview
+@Composable
 fun ListItemPreview(){
     val plate = Plate()
     ListItem(plate)
@@ -237,7 +292,9 @@ fun ListItemPreview(){
 @Composable
 fun ListItem(item: Plate) {
     Surface(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
         shape = RoundedCornerShape(8.dp),
         elevation = 2.dp
     ) {
@@ -251,7 +308,7 @@ fun ListItem(item: Plate) {
             Column(
                 modifier = Modifier
                     .padding(8.dp)
-                    .constrainAs(column){
+                    .constrainAs(column) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
@@ -263,7 +320,7 @@ fun ListItem(item: Plate) {
             }
             Spacer(
                 modifier = Modifier
-                    .constrainAs(divider){
+                    .constrainAs(divider) {
                         top.linkTo(column.top)
                         bottom.linkTo(column.bottom)
                         start.linkTo(guideline)
@@ -275,7 +332,7 @@ fun ListItem(item: Plate) {
             Text(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 34.dp)
-                    .constrainAs(text){
+                    .constrainAs(text) {
                         start.linkTo(divider.end)
                         end.linkTo(parent.end)
                         top.linkTo(parent.top)

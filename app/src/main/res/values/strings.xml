@@ -12,4 +12,5 @@
     <string name="staggered_chips_route" translatable="false">staggered route</string>
     <string name="simple_constraint" translatable="false">simple constraint route</string>
     <string name="large_constraint" translatable="false">large constraint route</string>
+    <string name="decoupled_route" translatable="false">decoupled constraint route</string>
 </resources>

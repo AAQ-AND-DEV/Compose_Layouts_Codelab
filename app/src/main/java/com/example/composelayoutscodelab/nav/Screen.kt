@@ -15,4 +15,5 @@ sealed class Screen(val route: String, @StringRes val resId: Int){
     object StaggeredChips: Screen("staggeredChips", R.string.staggered_chips_route)
     object SimpleConstraint: Screen("simpleConstraint", R.string.simple_constraint)
     object LargeConstraint: Screen("largeConstraint", R.string.large_constraint)
+    object DecoupledConstraint: Screen("decoupledConstraint", R.string.decoupled_route)
 }
