@@ -189,7 +189,7 @@ fun LayoutsCodelab(mvm: MainViewModel) {
 
 @Composable
 fun TwoTexts(modifier: Modifier = Modifier, text1: String, text2: String){
-    Row(modifier = modifier){
+    Row(modifier = modifier.height(IntrinsicSize.Min)){
         Text(modifier = Modifier
             .weight(1f)
             .padding(start = 4.dp)
